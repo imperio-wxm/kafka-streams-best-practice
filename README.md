@@ -7,3 +7,5 @@
 ## Catalog
 
 - kafka-streams-serializable
+    - JsonSerialization
+    - AvroSerialization
