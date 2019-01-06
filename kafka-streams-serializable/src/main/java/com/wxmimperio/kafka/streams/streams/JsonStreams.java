@@ -21,13 +21,15 @@ public class JsonStreams {
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.110:9092");
         config.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "3000");
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerialization.class);
+        config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
+        //config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerialization.class);
 
         DateTimeFormatter eventTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         StreamsBuilder builder = new StreamsBuilder();
         final KStream<String, JSONObject> rawStreams = builder.stream(
                 "stream-test1",
+                // 指定消费时的序列化器
                 Consumed.with(Serdes.String(),new JsonSerialization())
         );
 
