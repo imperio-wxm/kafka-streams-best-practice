@@ -2,6 +2,8 @@ package com.wxmimperio.kafka.streams.producer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.wxmimperio.kafka.streams.commons.SchemaUtils;
+import org.apache.avro.Schema;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -48,8 +50,8 @@ public class SimpleProducer {
         return new KafkaProducer<>(props());
     }
 
-    private void process(Producer producer, String key, String value) {
-        final ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, key, value.getBytes());
+    private void process(Producer producer, String key, byte[] value) {
+        final ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, key, value);
         Future<RecordMetadata> future = producer.send(record);
         try {
             LOG.info("Topic = {}, Offset = {}, Partition = {}", future.get().toString(), future.get().offset(), future.get().partition());
@@ -61,13 +63,16 @@ public class SimpleProducer {
     private void start() {
         long index = 0L;
         try (Producer producer = getProducer()) {
+            Schema schema = SchemaUtils.getSchema("E:\\coding\\github\\kafka-streams-best-practice\\kafka-streams-serializable\\src\\main\\resources\\test.avro");
             while (!closed.get()) {
 
                 JSONObject message = new JSONObject();
                 message.put("name", UUID.randomUUID().toString());
 
+                // schema
+                process(producer, Long.toString(System.currentTimeMillis()), SchemaUtils.avroSerializedValue(schema,message));
 
-                process(producer, Long.toString(System.currentTimeMillis()), JSON.toJSON(message).toString());
+                //process(producer, Long.toString(System.currentTimeMillis()), message.toString().getBytes());
                 Thread.sleep(5000);
                 System.out.println(message);
 
