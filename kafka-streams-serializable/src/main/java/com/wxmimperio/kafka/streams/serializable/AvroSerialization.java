@@ -4,16 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wxmimperio.kafka.streams.commons.SchemaUtils;
 import org.apache.avro.Schema;
-import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class AvroSerialization  implements Serde<JSONObject> {
+public class AvroSerialization implements Serde<JSONObject> {
+    private static final Logger LOG = LoggerFactory.getLogger(AvroSerialization.class);
 
     private Schema schema;
 
@@ -55,13 +56,14 @@ public class AvroSerialization  implements Serde<JSONObject> {
 
         @Override
         public byte[] serialize(String topic, JSONObject data) {
-            if(null == data) {
+            if (null == data) {
                 return null;
             }
             try {
                 return SchemaUtils.avroSerializedValue(schema, data);
-            } catch (IOException e) {
-                throw new SerializationException(String.format("Error serialize Avro message: %s", data.toJSONString()), e);
+            } catch (Exception e) {
+                LOG.error(String.format("Error serialize Avro message: %s", data.toJSONString()), e);
+                return null;
             }
         }
 
@@ -86,13 +88,14 @@ public class AvroSerialization  implements Serde<JSONObject> {
 
         @Override
         public JSONObject deserialize(String topic, byte[] data) {
-            if(null == data) {
+            if (null == data) {
                 return null;
             }
             try {
                 return JSON.parseObject(SchemaUtils.readAvro(schema, data));
-            } catch (IOException e) {
-                throw new SerializationException(String.format("Error deserialize Avro message: %s", new String(data, Charset.forName("UTF-8"))), e);
+            } catch (Exception e) {
+                LOG.error(String.format("Error deserialize Avro message: %s", new String(data, Charset.forName("UTF-8"))), e);
+                return null;
             }
         }
 

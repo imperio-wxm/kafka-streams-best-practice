@@ -3,7 +3,6 @@ package com.wxmimperio.kafka.streams.streams;
 import com.alibaba.fastjson.JSONObject;
 import com.wxmimperio.kafka.streams.commons.SchemaUtils;
 import com.wxmimperio.kafka.streams.serializable.AvroSerialization;
-import com.wxmimperio.kafka.streams.serializable.JsonSerialization;
 import org.apache.avro.Schema;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -35,11 +34,14 @@ public class JsonStreams {
                 "stream-test1",
                 // 指定消费时的序列化器
                 //Consumed.with(Serdes.String(), new JsonSerialization())
-                Consumed.with(Serdes.String(),new AvroSerialization(schema))
+                Consumed.with(Serdes.String(), new AvroSerialization(schema))
         );
 
+
         rawStreams.mapValues(value -> {
-            value.put("event_time", eventTimePattern.format(LocalDateTime.now()));
+            if (null != value) {
+                value.put("event_time", eventTimePattern.format(LocalDateTime.now()));
+            }
             return value;
         }).peek((key, value) ->
                 System.out.println("Key = " + key + ", value = " + value)

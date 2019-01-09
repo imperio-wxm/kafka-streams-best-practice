@@ -1,6 +1,5 @@
 package com.wxmimperio.kafka.streams.producer;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wxmimperio.kafka.streams.commons.SchemaUtils;
 import org.apache.avro.Schema;
